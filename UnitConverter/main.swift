@@ -49,11 +49,11 @@ func extractUnit(firstStr:String, lastUnit:String, index:Int){
     let indexStartOfText = firstStr.index(firstStr.startIndex, offsetBy: numberIndex)
     let firstUnit:String = String(firstStr[indexStartOfText...])
     
-    compareUnit(firstUnit: firstUnit, lastUnit: lastUnit, doubleNumber: doubleNumber, recursive: false)
+    compareUnit(firstUnit: firstUnit, lastUnit: lastUnit, doubleNumber: doubleNumber)
 }
 
 // Unit 비교
-func compareUnit(firstUnit:String, lastUnit:String, doubleNumber:Double, recursive:Bool){
+func compareUnit(firstUnit:String, lastUnit:String, doubleNumber:Double){
     let units = (firstUnit, lastUnit)
     switch units {
         // cm   -> m
