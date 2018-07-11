@@ -10,17 +10,23 @@ import Foundation
 
 // 인치 길이 변환과 예외 처리
 
+typealias StringTuple = (first: String, last: String, index: Int)
+typealias UnitTuple = (first: String, last: String, value: Double)
+
+
 // 값 받기
 func main(){
     print("값을 입력하세요 ex : 18cm inch")
     let inputValue = readLine()
     if let input = inputValue {
-        divideUnit(input: input)
+        let divide: StringTuple = divideUnit(input: input)
+        let extract: UnitTuple = extractUnit(StringTuple: divide)
+        compareUnit(UnitTuple: extract)
     }
 }
 
 // 문자열 나누기
-func divideUnit(input:String){
+func divideUnit(input:String) -> StringTuple {
     let separatorStr = input.split(separator: " ")
     let firstStr:String = String(separatorStr.first!)
     let lastStr:String = String(separatorStr.last!)
@@ -33,11 +39,16 @@ func divideUnit(input:String){
     }else if firstStr.contains("inch"){
         index = -4
     }
-    extractUnit(firstStr: firstStr, lastUnit: lastStr, index: index)
+    let result: StringTuple = (firstStr, lastStr, index)
+    return result
 }
 
 // Number, Unit 구하기
-func extractUnit(firstStr:String, lastUnit:String, index:Int){
+func extractUnit(StringTuple: StringTuple) -> UnitTuple {
+    
+    let firstStr = StringTuple.first
+    let lastUnit = StringTuple.last
+    let index = StringTuple.index
     
     // 숫자 추출 및 Double로 변환
     let indexEndOfText = firstStr.index(firstStr.endIndex, offsetBy: index)
@@ -49,11 +60,18 @@ func extractUnit(firstStr:String, lastUnit:String, index:Int){
     let indexStartOfText = firstStr.index(firstStr.startIndex, offsetBy: numberIndex)
     let firstUnit:String = String(firstStr[indexStartOfText...])
     
-    compareUnit(firstUnit: firstUnit, lastUnit: lastUnit, doubleNumber: doubleNumber)
+    // 리턴값
+    let result:UnitTuple = (firstUnit, lastUnit, doubleNumber)
+    return result
 }
 
 // Unit 비교
-func compareUnit(firstUnit:String, lastUnit:String, doubleNumber:Double){
+func compareUnit(UnitTuple:UnitTuple){
+    
+    let firstUnit = UnitTuple.first
+    let lastUnit = UnitTuple.last
+    let value = UnitTuple.value
+    
     let units = (firstUnit, lastUnit)
     switch units {
         // cm   -> m
@@ -61,27 +79,27 @@ func compareUnit(firstUnit:String, lastUnit:String, doubleNumber:Double){
         // m    -> cm
         // m    -> inch
         // inch -> cm
-    // inch -> m
+        // inch -> m
     case ("cm","m"):
-        let result = convertCMtoM(number: doubleNumber)
+        let result = convertCMtoM(number: value)
         print("\(result)m")
     case ("cm","inch"):
-        let result = convertCMtoINCH(number: doubleNumber)
+        let result = convertCMtoINCH(number: value)
         print("\(result)inch")
     case ("m","cm"):
-        let result = convertMtoCM(number: doubleNumber)
+        let result = convertMtoCM(number: value)
         print("\(result)cm")
     case ("m","inch"):
         // m -> cm -> inch
-        let cm = convertMtoCM(number: doubleNumber)
+        let cm = convertMtoCM(number: value)
         let result = convertCMtoINCH(number: cm)
         print("\(result)inch")
     case ("inch","cm"):
-        let result = convertINCHtoCM(number: doubleNumber)
+        let result = convertINCHtoCM(number: value)
         print("\(result)cm")
     case ("inch","m"):
         // inch -> cm -> m
-        let cm = convertINCHtoCM(number: doubleNumber)
+        let cm = convertINCHtoCM(number: value)
         let result = convertCMtoM(number: cm)
         print("\(result)m")
     default:
