@@ -12,6 +12,8 @@
  2. 단위별 Default 값 설정
  3. 입력 반복
  4. 종료키
+ 5. enum 사용
+ 6. CharacterSet 응용하여 함수 만듬
 */
 
 import Foundation
@@ -20,7 +22,6 @@ import Foundation
 
 typealias StringTuple = (first: String, last: String, index: Int)
 typealias UnitTuple = (first: String, last: String, value: Double)
-
 
 // 값 받기
 func main() -> Bool {
@@ -41,24 +42,41 @@ func main() -> Bool {
     return true
 }
 
+enum LengthUnit:Double{
+    case Cm = 1
+    case M = 100
+    case Inch = 2.54
+    case Yard = 91.44
+}
+
 // 문자열 나누기
 func divideUnit(input:String) -> StringTuple {
     let separatorStr = input.split(separator: " ")
     let firstStr:String = String(separatorStr.first!)
     let lastStr:String = String(separatorStr.last!)
     
-    var index:Int = 0
-    if firstStr.contains("cm"){
-        index = -2
-    }else if firstStr.contains("m"){
-        index = -1
-    }else if firstStr.contains("inch"){
-        index = -4
-    }else if firstStr.contains("yard"){
-        index = -4
-    }
+    let index:Int = getIndex(characters: firstStr)
     let result: StringTuple = (firstStr, lastStr, index)
+    
     return result
+}
+
+func getIndex(characters:String) -> Int {
+    let characterSet:String = "abcdefghijklmnopqrstuvwxyz"
+
+    var characters:String = characters
+    // startindex값부터 순서대로 확인후 characterSet에 포함되지 않은 경우 지워주고 포함되면 멈춥니다.
+    for character in characters {
+        if characterSet.contains(character){
+            break
+        }else{
+            characters.remove(at: characters.startIndex)
+        }
+    }
+    
+    // ex : 2 -> -2 / 4 -> -4 convert
+    let index:Int = characters.count - 2 * characters.count
+    return index
 }
 
 // Number, Unit 구하기
@@ -94,13 +112,13 @@ func convertUnit(unit:String, value:Double, isCM:Bool) -> Double{
     
     switch unit {
     case "m":
-        number = 100
+        number = LengthUnit.M.rawValue
     case "inch":
-        number = 2.54
+        number = LengthUnit.Inch.rawValue
     case "yard":
-        number = 91.44
+        number = LengthUnit.Yard.rawValue
     default:
-        number = 1
+        number = LengthUnit.Cm.rawValue
     }
     
     if isCM {
