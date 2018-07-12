@@ -86,104 +86,70 @@ func extractUnit(StringTuple: StringTuple) -> UnitTuple {
     return result
 }
 
-// Unit 비교
-func compareUnit(UnitTuple:UnitTuple){
+func convertUnit(unit:String, value:Double, isCM:Bool) -> Double{
+    // isCM = true  -> *
+    // isCM = false -> /
+    var number:Double = 0
+    var result:Double = 0
     
-    let firstUnit = UnitTuple.first
-    let lastUnit = UnitTuple.last
-    let value = UnitTuple.value
-    
-    let units = (firstUnit, lastUnit)
-    
-    switch units {
-    case ("cm","m"):
-        let result = convertCMtoM(number: value)
-        print("\(result)m")
-    case ("cm","inch"):
-        let result = convertCMtoINCH(number: value)
-        print("\(result)inch")
-    case ("cm","yard"):
-        let result = convertCMtoYARD(number: value)
-        print("\(result)yard")
-    case ("cm","cm"):
-        let result = convertCMtoM(number: value)
-        print("\(result)m")
-    case ("m","cm"):
-        let result = convertMtoCM(number: value)
-        print("\(result)cm")
-    case ("m","inch"):
-        // m -> cm -> inch
-        let cm = convertMtoCM(number: value)
-        let result = convertCMtoINCH(number: cm)
-        print("\(result)inch")
-    case ("m","yard"):
-        let cm = convertMtoCM(number: value)
-        let result = convertCMtoYARD(number: cm)
-        print("\(result)yard")
-    case ("m","m"):
-        let result = convertMtoCM(number: value)
-        print("\(result)cm")
-    case ("inch","cm"):
-        let result = convertINCHtoCM(number: value)
-        print("\(result)cm")
-    case ("inch","m"):
-        // inch -> cm -> m
-        let cm = convertINCHtoCM(number: value)
-        let result = convertCMtoM(number: cm)
-        print("\(result)m")
-    case ("inch","yard"):
-        // inch -> cm -> yard
-        let cm = convertINCHtoCM(number: value)
-        let result = convertCMtoYARD(number: cm)
-        print("\(result)yard")
-    case ("inch","inch"):
-        // inch -> cm -> yard
-        let cm = convertINCHtoCM(number: value)
-        let result = convertCMtoM(number: cm)
-        print("\(result)m")
-    case ("yard","m"):
-        let cm = convertYARDtoCM(number: value)
-        let result = convertCMtoM(number: cm)
-        print("\(result)m")
-    case ("yard","cm"):
-        let result = convertYARDtoCM(number: value)
-        print("\(result)cm")
-    case ("yard","inch"):
-        let cm = convertYARDtoCM(number: value)
-        let result = convertCMtoINCH(number: cm)
-        print("\(result)inch")
-    case ("yard","yard"):
-        let cm = convertYARDtoCM(number: value)
-        let result = convertCMtoM(number: cm)
-        print("\(result)m")
+    switch unit {
+    case "m":
+        number = 100
+    case "inch":
+        number = 2.54
+    case "yard":
+        number = 91.44
     default:
-        print("지원하지 않는 단위입니다.")
+        number = 1
     }
+    
+    if isCM {
+        result = value * number
+    }else{
+        result = value / number
+    }
+    
+    return result
 }
 
-func convertCMtoM(number:Double) -> Double{
-    let value = number / 100
-    return value
-}
-func convertMtoCM(number:Double) -> Double{
-    let value = number * 100
-    return value
-}
-func convertCMtoINCH(number:Double) -> Double{
-    let value = number / 2.54
-    return value
-}
-func convertINCHtoCM(number:Double) -> Double{
-    let value = number * 2.54
-    return value
-}
-func convertCMtoYARD(number:Double) -> Double{
-    let value = number / 91.44
-    return value
-}
-func convertYARDtoCM(number:Double) -> Double{
-    let value = number * 91.44
-    return value
+// Unit 비교
+func compareUnit(UnitTuple:UnitTuple){
+    let firstUnit = UnitTuple.first
+    var lastUnit = UnitTuple.last
+    let value = UnitTuple.value
+    
+    var result:Double = 0
+    
+    // 1) cm 으로 변환하거나 건너뛰거나
+    if firstUnit == "cm" {
+        // 그대로 세팅
+        result = value
+    }else{
+        // cm 로 변환 (Default)
+        result = convertUnit(unit: firstUnit, value: value, isCM: true)
+    }
+    
+    // 2) last 값에 따라 분기
+    if firstUnit == lastUnit {
+        // m -> cm or !m -> m
+        if firstUnit == "m" {
+            // 그대로 위에서 나온 값 전달
+            // lastUnit을 cm 으로 지정
+            lastUnit = "cm"
+        }else{
+            // unit을 m 으로 지정해서 변환
+            // lastUnit을 m 으로 지정
+            result = convertUnit(unit: "m", value: result, isCM: false)
+            lastUnit = "m"
+        }
+    }else if lastUnit == "cm" {
+        // 그대로 위에서 나온 값 전달
+    }else{
+        // last 값에 따라 변환
+        result = convertUnit(unit: lastUnit, value: result, isCM: false)
+    }
+    
+    print("\(result)\(lastUnit)")
 }
 
 // 실행
