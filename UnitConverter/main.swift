@@ -20,13 +20,10 @@
 
 import Foundation
 
-// 인치 길이 변환과 예외 처리
-
 typealias UnitTuple = (first: String, last: String, value: Double)
 
 // 값 받기
 func main() -> Bool {
-    
     print("값을 입력하세요 ex : 18cm inch // 종료는 q 혹은 quit")
     let inputValue = readLine()
     
@@ -43,18 +40,62 @@ func main() -> Bool {
     return true
 }
 
-enum LengthUnit:Double{
-    case Cm = 1
-    case M = 100
-    case Inch = 2.54
-    case Yard = 91.44
+enum LengthUnit:String {
+    case cm
+    case m
+    case inch
+    case yard
+    
+    static let allCase = [cm,m,inch,yard]
+    static let `default` = "cm"
+    
+    var str: String {
+        switch self {
+        case .cm    : return "cm"
+        case .m     : return "m"
+        case .inch  : return "inch"
+        case .yard  : return "yard"
+        }
+    }
+    
+    var value: Double {
+        switch self {
+        case .cm    : return 1
+        case .m     : return 100
+        case .inch  : return 2.54
+        case .yard  : return 91.44
+        }
+    }
+    
 }
 
-enum WeightUnit:Double{
-    case G = 1
-    case Kg = 1000
-    case Oz = 28.34952
-    case Lb = 453.59237
+enum WeightUnit:String{
+    case g
+    case kg
+    case oz
+    case lb
+    
+    static let allCase = [g,kg,oz,lb]
+    static let `default` = "g"
+    
+    var str: String {
+        switch self {
+        case .g : return "g"
+        case .kg: return "kg"
+        case .oz: return "oz"
+        case .lb: return "lb"
+        }
+    }
+    
+    var value: Double {
+        switch self {
+        case .g : return 1
+        case .kg: return 1000
+        case .oz: return 28.34952
+        case .lb: return 453.59237
+        }
+    }
+    
 }
 
 func divideUnit(input:String) -> UnitTuple {
@@ -64,6 +105,7 @@ func divideUnit(input:String) -> UnitTuple {
     
     let characterSet:String = "abcdefghijklmnopqrstuvwxyz"
     
+    // 첫번째 글자에서 숫자와 단위 구하기
     var valueString:String = ""
     var firstUnit:String = ""
     for char in firstStr {
@@ -84,23 +126,23 @@ func divideUnit(input:String) -> UnitTuple {
     return result
 }
 
-func calculateUnit(unit: String, value: Double, isDefault: Bool) -> Double {
-    let number:Double = settingValueOfDivide(str: unit)
-    return calculation(value: value, number: number, isTrue: isDefault)
+func calculateUnit(unit: String, value: Double, isFirst: Bool) -> Double {
+    let numberForDivide:Double = settingValueOfDivide(forUnit: unit)
+    return calculation(value: value, numberForDivide: numberForDivide, isFirst: isFirst)
 }
 
-func settingValueOfDivide(str:String) -> Double{
+func settingValueOfDivide(forUnit:String) -> Double{
     var result:Double = 0
-    switch str {
-    case "g": result = WeightUnit.G.rawValue
-    case "kg": result = WeightUnit.Kg.rawValue
-    case "oz": result = WeightUnit.Oz.rawValue
-    case "lb": result = WeightUnit.Lb.rawValue
+    switch forUnit {
+    case "g"    : result = WeightUnit.g.value
+    case "kg"   : result = WeightUnit.kg.value
+    case "oz"   : result = WeightUnit.oz.value
+    case "lb"   : result = WeightUnit.lb.value
         
-    case "cm": result = LengthUnit.Cm.rawValue
-    case "m": result = LengthUnit.M.rawValue
-    case "inch": result = LengthUnit.Inch.rawValue
-    case "yard": result = LengthUnit.Yard.rawValue
+    case "cm"   : result = LengthUnit.cm.value
+    case "m"    : result = LengthUnit.m.value
+    case "inch" : result = LengthUnit.inch.value
+    case "yard" : result = LengthUnit.yard.value
         
     default: result = 1
     }
@@ -108,46 +150,75 @@ func settingValueOfDivide(str:String) -> Double{
     return result
 }
 
-func calculation(value:Double, number:Double, isTrue:Bool) -> Double {
-    if isTrue {
-        return value * number
+func calculation(value:Double, numberForDivide:Double, isFirst:Bool) -> Double {
+    if isFirst {
+        return value * numberForDivide
     }else {
-        return value / number
+        return value / numberForDivide
+    }
+}
+
+struct WantToChange {
+    var beforeUnit:String
+    var afterUnit:String
+    var value:Double
+    
+    init(beforeUnit:String, afterUnit:String, value:Double) {
+        self.beforeUnit = beforeUnit
+        self.afterUnit = afterUnit
+        self.value = value
+    }
+    
+    func firstValue() -> Double {
+        return calculateUnit(unit: self.beforeUnit, value: self.value, isFirst: true)
+    }
+    
+    func secondValue(defaultValue:Double) {
+        
+        if beforeUnit == afterUnit {
+            // 길이 전부 출력
+            if LengthUnit.init(rawValue: self.beforeUnit) != nil {
+                for unit in LengthUnit.allCase {
+                    let result = calculateUnit(unit: unit.str, value: defaultValue, isFirst: false)
+                    print("\(result)\(unit.str)")
+                }
+            }
+            // 무게 전부 출력
+            if WeightUnit.init(rawValue: self.beforeUnit) != nil {
+                for unit in WeightUnit.allCase {
+                    let result = calculateUnit(unit: unit.str, value: defaultValue, isFirst: false)
+                    print("\(result)\(unit.str)")
+                }
+            }
+            
+        }else {
+            // 쉼표 기준으로 자르기
+            if afterUnit.contains(",") {
+                let units = afterUnit.split(separator: ",")
+                for unit in units {
+                    let result = calculateUnit(unit: String(unit), value: defaultValue, isFirst: false)
+                    print("\(result)\(unit)")
+                }
+            }else {
+                let result = calculateUnit(unit: self.afterUnit, value: defaultValue, isFirst: false)
+                print("\(result)\(self.afterUnit)")
+            }
+        }
     }
 }
 
 // Unit 비교
 func compareUnit(UnitTuple:UnitTuple){
     let firstUnit = UnitTuple.first
-    var lastUnit = UnitTuple.last
+    let lastUnit = UnitTuple.last
     let value = UnitTuple.value
     
-    var result:Double = 0
+    let wantToChange = WantToChange.init(beforeUnit: firstUnit, afterUnit: lastUnit, value: value)
     
     // 1. Default Calculate : length -> cm / weight -> g
-    result = calculateUnit(unit: firstUnit, value: value, isDefault: true)
-    
-    let length:String = "mcminchyard"
-    let weight:String = "gkgozlb"
-    
+    let defaultValue = wantToChange.firstValue()
     // 2. want to change : -> ?
-    if firstUnit == lastUnit {
-        if length.contains(firstUnit) && firstUnit == "m" {
-            lastUnit = "cm"
-        }else if length.contains(firstUnit) && firstUnit != "m" {
-            result = calculateUnit(unit: "m", value: result, isDefault: false)
-            lastUnit = "m"
-        }else if weight.contains(firstUnit) && firstUnit == "kg" {
-            lastUnit = "g"
-        }else if weight.contains(firstUnit) && firstUnit != "kg" {
-            result = calculateUnit(unit: "kg", value: result, isDefault: false)
-            lastUnit = "kg"
-        }
-    } else {
-        result = calculateUnit(unit: lastUnit, value: result, isDefault: false)
-    }
-    
-    print("\(result)\(lastUnit)")
+    wantToChange.secondValue(defaultValue: defaultValue)
 }
 
 // 실행
